@@ -13,7 +13,6 @@ import com.example.alarmapplication.ui.theme.AlarmApplicationTheme
 class AlarmActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        println("Time 2: ${System.currentTimeMillis()/1000}")
 
         setContent {
             AlarmApplicationTheme {

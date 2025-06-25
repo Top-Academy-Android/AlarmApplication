@@ -1,5 +1,6 @@
 package com.example.alarmapplication
 
+import android.app.Notification.DEFAULT_SOUND
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -7,11 +8,19 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.media.MediaPlayer
 import androidx.core.app.NotificationCompat
 import kotlin.random.Random
 
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
+        makeAlarmNotification(context)
+
+        val mediaPlayer = MediaPlayer.create(context, R.raw.padenie_truby)
+        mediaPlayer.start()
+    }
+
+    private fun makeAlarmNotification(context: Context?) {
         val intent = Intent(
             context,
             AlarmActivity::class.java,
@@ -41,9 +50,13 @@ class AlarmReceiver : BroadcastReceiver() {
             .setSmallIcon(R.drawable.ic_launcher_background)
             .setContentTitle("Alarm title")
             .setContentText("Alarm text")
-            .setPriority(NotificationCompat.PRIORITY_MAX)
             .setFullScreenIntent(pendingIntent, true)
+            .setAutoCancel(true)
 
-        notificationManager.notify(99, builder.build())
+        val notification = builder.build().apply {
+            defaults = defaults or DEFAULT_SOUND.inv()
+        }
+
+        notificationManager.notify(99, notification)
     }
 }

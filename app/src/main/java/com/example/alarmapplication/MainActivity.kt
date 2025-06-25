@@ -5,6 +5,7 @@ import android.app.AlarmManager
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -16,7 +17,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -72,7 +77,7 @@ class MainActivity : ComponentActivity() {
                                     PendingIntent.FLAG_IMMUTABLE,
                                 )
 
-                                println("Time 1: ${System.currentTimeMillis() / 1000}")
+                                println("Scheduled alarm in $alarmDelaySecs at ${System.currentTimeMillis() / 1000}")
                                 alarmManager.setExact(
                                     AlarmManager.RTC_WAKEUP,
                                     System.currentTimeMillis() + alarmDelaySecs*1000,
@@ -96,6 +101,14 @@ class MainActivity : ComponentActivity() {
                                 } catch (_: NumberFormatException) { }
                             }
                         )
+                        IconButton(
+                            onClick = {
+                                val mediaPlayer = MediaPlayer.create(this@MainActivity, R.raw.padenie_truby)
+                                mediaPlayer.start()
+                            }
+                        ) {
+                            Icon(Icons.Default.PlayArrow, null)
+                        }
                     }
                 }
             }
