@@ -1,14 +1,15 @@
 package com.example.alarmapplication
 
 import android.annotation.SuppressLint
-import android.app.ActivityOptions
 import android.app.AlarmManager
+import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
+import android.provider.Settings
+import android.provider.Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT
+import android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,52 +20,60 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.alarmapplication.ui.theme.AlarmApplicationTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlin.random.Random
 
+
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalPermissionsApi::class)
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val am = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val notificationManager =
+            this.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+        if (!Settings.canDrawOverlays(this)) {
+            startActivity(Intent(ACTION_MANAGE_OVERLAY_PERMISSION))
+        }
+
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+            !notificationManager.canUseFullScreenIntent()
+        ) {
+            startActivity(Intent(ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT))
+        }
+
+        val alarmManager = applicationContext.getSystemService(ALARM_SERVICE) as AlarmManager
 
         setContent {
-            var alarmDelaySecs by remember { mutableIntStateOf(10) }
+            var alarmDelaySecs by remember { mutableIntStateOf(5) }
 
             AlarmApplicationTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Column(Modifier.padding(innerPadding)) {
                         Button(
                             onClick = {
-                                val intent = Intent(this@MainActivity, AlarmActivity::class.java)
+                                val intent = Intent("com.example.alarmapplication.ACTION_ALARM").apply {
+                                    setPackage("com.example.alarmapplication")
+                                }
 
-                                val ao = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                                    ActivityOptions.makeBasic().setPendingIntentCreatorBackgroundActivityStartMode(
-                                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-                                    )
-                                } else null
-
-                                val pendingIntent = PendingIntent.getActivity(
+                                val pendingIntent = PendingIntent.getBroadcast(
                                     this@MainActivity,
                                     Random.nextInt(),
                                     intent,
                                     PendingIntent.FLAG_IMMUTABLE,
-                                    ao?.toBundle()
                                 )
 
                                 println("Time 1: ${System.currentTimeMillis() / 1000}")
-                                am.setExact(
+                                alarmManager.setExact(
                                     AlarmManager.RTC_WAKEUP,
                                     System.currentTimeMillis() + alarmDelaySecs*1000,
                                     pendingIntent,
@@ -84,8 +93,7 @@ class MainActivity : ComponentActivity() {
                                 try {
                                     val int = newValue.toInt()
                                     alarmDelaySecs = int
-                                } catch (_: NumberFormatException) {
-                                }
+                                } catch (_: NumberFormatException) { }
                             }
                         )
                     }
@@ -95,18 +103,3 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AlarmApplicationTheme {
-        Greeting("Android")
-    }
-}

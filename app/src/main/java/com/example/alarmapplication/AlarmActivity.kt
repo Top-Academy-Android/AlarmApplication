@@ -8,18 +8,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.motionEventSpy
 import com.example.alarmapplication.ui.theme.AlarmApplicationTheme
 
 class AlarmActivity : ComponentActivity() {
-    override fun onStart() {
-        super.onStart()
-        println("Time 2: ${System.currentTimeMillis()/1000}")
-    }
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        println("Time 2: ${System.currentTimeMillis()/1000}")
 
         setContent {
             AlarmApplicationTheme {
